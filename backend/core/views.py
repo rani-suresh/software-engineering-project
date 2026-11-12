@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from .ai import course_risk_rows, generate_summary, student_insights
 
 from .models import User, Course, Enrollment, ClassSession, AttendanceRecord
 from .permissions import IsAdminRole, IsTeacherOrAdmin, AdminWriteOrReadOnly
@@ -130,3 +131,28 @@ def course_report(request, course_id):
             'percentage': round(attended / total * 100, 1) if total else None,
         })
     return Response({'course': course.name, 'students': rows})
+
+@api_view(['GET'])
+@permission_classes([IsTeacherOrAdmin])
+def at_risk(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    if request.user.role == 'teacher' and course.teacher_id != request.user.id:
+        return Response({'detail': 'Not your course.'}, status=403)
+    return Response({'course': course.name, 'students': course_risk_rows(course)})
+
+
+@api_view(['GET'])
+@permission_classes([IsTeacherOrAdmin])
+def ai_summary(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    if request.user.role == 'teacher' and course.teacher_id != request.user.id:
+        return Response({'detail': 'Not your course.'}, status=403)
+    text, source, note = generate_summary(course.name, course_risk_rows(course))
+    return Response({'course': course.name, 'summary': text, 'source': source, 'note': note})
+
+
+@api_view(['GET'])
+def my_insights(request):
+    if request.user.role != 'student':
+        return Response([])
+    return Response(student_insights(request.user))

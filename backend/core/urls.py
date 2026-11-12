@@ -12,5 +12,8 @@ urlpatterns = [
     path('auth/login/', views.LoginView.as_view()),
     path('my-attendance/', views.my_attendance),
     path('reports/course/<int:course_id>/', views.course_report),
+    path('ai/at-risk/<int:course_id>/', views.at_risk),
+    path('ai/summary/<int:course_id>/', views.ai_summary),
+    path('ai/my-insights/', views.my_insights),
     path('', include(router.urls)),
 ]
