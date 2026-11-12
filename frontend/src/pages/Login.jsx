@@ -31,12 +31,7 @@ export default function Login() {
           </div>
           <div>
             <h1>Attendance, made simple.</h1>
-            <p>Mark, track and understand attendance across every class, all in one place.</p>
-            <ul>
-              <li><Icon name="check" /> Quick marking for teachers</li>
-              <li><Icon name="calendar" /> Live percentages for students</li>
-              <li><Icon name="alert" /> Early warnings for low attendance</li>
-            </ul>
+        
           </div>
         </div>
 

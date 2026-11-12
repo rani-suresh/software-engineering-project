@@ -3,9 +3,14 @@ import { useAuth } from '../AuthContext';
 import Icon from './Icons';
 
 const NAV = {
-  student: [{ to: '/student', label: 'Dashboard', icon: 'grid' }],
+  student: [{ to: '/student', label: 'Dashboard', icon: 'grid', end: true }],
   teacher: [{ to: '/teacher', label: 'My Courses', icon: 'book' }],
-  admin: [{ to: '/admin', label: 'Dashboard', icon: 'grid' }],
+  admin: [
+    { to: '/admin', label: 'Dashboard', icon: 'grid', end: true },
+    { to: '/admin/students', label: 'Students', icon: 'users' },
+    { to: '/admin/teachers', label: 'Teachers', icon: 'user' },
+    { to: '/admin/courses', label: 'Courses', icon: 'book' },
+  ],
 };
 
 export default function Layout({ title, plain = false, children }) {
@@ -39,7 +44,7 @@ export default function Layout({ title, plain = false, children }) {
           </div>
           <nav className="nav">
             {(NAV[user?.role] || []).map((item) => (
-              <NavLink key={item.to} to={item.to}>
+              <NavLink key={item.to} to={item.to} end={item.end}>
                 <Icon name={item.icon} /> {item.label}
               </NavLink>
             ))}

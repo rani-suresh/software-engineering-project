@@ -10,11 +10,15 @@ const level = (p) => (p == null ? 'none' : p >= 75 ? 'good' : p >= 60 ? 'mid' : 
 export default function StudentDashboard() {
   const { user } = useAuth();
   const [rows, setRows] = useState([]);
+  const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/my-attendance/')
-      .then((res) => setRows(res.data))
+    Promise.all([api.get('/my-attendance/'), api.get('/ai/my-insights/')])
+      .then(([a, i]) => {
+        setRows(a.data);
+        setInsights(i.data);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -47,23 +51,37 @@ export default function StudentDashboard() {
           </div>
 
           <div className="grid">
-            <div className="card">
-              <h3>My courses</h3>
-              {rows.length === 0 ? <p>You are not enrolled in any courses yet.</p> : rows.map((r) => (
-                <div className={`course ${level(r.percentage)}`} key={r.course_id}>
-                  <div className="course-top">
-                    <strong>{r.course}</strong>
-                    <span className={`badge ${level(r.percentage)}`}>
-                      {r.percentage === null ? 'No classes yet' : `${r.percentage}%`}
-                    </span>
+            <div className="left">
+              <div className="card">
+                <h3>My courses</h3>
+                {rows.length === 0 ? <p>You are not enrolled in any courses yet.</p> : rows.map((r) => (
+                  <div className={`course ${level(r.percentage)}`} key={r.course_id}>
+                    <div className="course-top">
+                      <strong>{r.course}</strong>
+                      <span className={`badge ${level(r.percentage)}`}>
+                        {r.percentage === null ? 'No classes yet' : `${r.percentage}%`}
+                      </span>
+                    </div>
+                    <div className="bar">
+                      <div className={`bar-fill ${level(r.percentage)}`}
+                           style={{ width: `${r.percentage ?? 0}%` }} />
+                    </div>
+                    <small>{r.attended} of {r.total_sessions} classes attended · {r.absent} absent</small>
                   </div>
-                  <div className="bar">
-                    <div className={`bar-fill ${level(r.percentage)}`}
-                         style={{ width: `${r.percentage ?? 0}%` }} />
+                ))}
+              </div>
+
+              <div className="card">
+                <h3>Smart tips</h3>
+                {insights.length === 0 ? (
+                  <p className="empty">Tips will appear once classes have been recorded.</p>
+                ) : insights.map((i) => (
+                  <div className={`tip ${i.level}`} key={i.course_id}>
+                    <strong>{i.course}</strong>
+                    <span>{i.tip}</span>
                   </div>
-                  <small>{r.attended} of {r.total_sessions} classes attended · {r.absent} absent</small>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             <div className="side">
